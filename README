@@ -1,0 +1,34 @@
+The simple-firewall layer contains the necessary files to build a
+simple firewall application container which can be deployed on an
+system which is running the OverC framework.
+
+Please see the corresponding sections below for details.
+
+Dependencies
+============
+
+  URI: https://github.com/OverC/meta-overc
+  branch: master-oci
+
+Patches
+=======
+
+Please submit any patches against the simple firwall layer via github.
+
+Table of Contents
+=================
+
+  I. Adding the simple-firewall layer to your build
+ II. Misc
+
+
+I. Adding the simple-firewall layer to your build
+=================================================
+
+Run 'bitbake-layers add-layer simple-firewall'
+
+II. Misc
+========
+
+This layer is intended to be used to demonstrate CI/CD using the OverC
+framework by allowing a simple firewall to be deployed and tuned.
