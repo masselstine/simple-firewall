@@ -1,10 +1,35 @@
 #!/bin/bash
 
+# Setup the route and forwarding. This is one place where
+# tests with Docker and deployment with OverC vary so account
+# for this.
+/sbin/ip link show eth0 2>&1 >/dev/null
+if [ $? -eq 0 ]; then
+    # We are testing with Docker
+    /usr/sbin/iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+else
+    # We are in production on OverC
+    /usr/sbin/iptables -t nat -A POSTROUTING -o simple-firewa -j MASQUERADE
+    /sbin/ip route add default via 192.168.42.1 dev simple-firewa
+fi
+
 # Setup secondary network device
 /sbin/ip address add 192.168.10.1/24 dev enp2s0
 /sbin/ip link set dev enp2s0 up
 
 # Setup DHCP server
 /usr/bin/dnsmasq --conf-file=/etc/dnsmasq.conf --conf-dir=/etc/dnsmasq.d
+
+# Setup firewall rules
+# Default is to drop all incoming packets
+/usr/sbin/iptables -P FORWARD DROP
+
+# Open ports as found in the ports.allow file.
+for port in $(cat /etc/ports.allow); do
+    /usr/sbin/iptables -A FORWARD -p tcp --dport $port -j ACCEPT
+    /usr/sbin/iptables -A FORWARD -p udp --dport $port -j ACCEPT
+    /usr/sbin/iptables -A FORWARD -p tcp --sport $port -j ACCEPT
+    /usr/sbin/iptables -A FORWARD -p udp --sport $port -j ACCEPT
+done
 
 sleep infinity
